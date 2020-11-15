@@ -21,10 +21,10 @@ class SW: # no bottom topography, viscocity, boundary conditions
         dvdx = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=0)
         dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
 
-        self.F_ops = [-h * dudx - u * dhdx - h * dvdy - v * dhdy,
-                      -u * dudx - v * dudy - g * dhdx + f * v - b * u,
-                      -u * dvdx - v * dvdy - g * dhdy - f * u - b * v]
-
+        self.F_ops = [-(h * dudx + u * dhdx + h * dvdy + v * dhdy),
+                      -(u * dudx + v * dudy + g * dhdx) + f * v - b * u,
+                      -(u * dvdx + v * dvdy + g * dhdy) - f * u - b * v]
+        self.BCs=[]
 
 class SW2:  # no viscocity, boundary conditions,
 
@@ -72,12 +72,10 @@ class SWsqBC: # SW with boundary conditions on a square tub
                       -u * dvdx - v * dvdy - g * dhdy - f * u - b * v]
 
         self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
-                    Left(0, spatial_order, u, 0, axis=1), Right(0, spatial_order, u, 0, axis=1),
-                    Left(0, spatial_order, v, 0, axis=0), Right(0, spatial_order, v, 0, axis=0),
                     Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
 
 class SW2sqBC: # SW2 with boundary conditions on a square tub
-    #implement bc for H, right now only works for periodic H, eg sinx*siny
+    # implement bc for H, right now only works for periodic H, eg sinx*siny
 
     def __init__(self, X, spatial_order, g, f, b):  # g=gravity, f=coriolis, b=drag
         h = X.field_list[0]
@@ -102,6 +100,4 @@ class SW2sqBC: # SW2 with boundary conditions on a square tub
                       0 * H]
 
         self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
-                    Left(0, spatial_order, u, 0, axis=1), Right(0, spatial_order, u, 0, axis=1),
-                    Left(0, spatial_order, v, 0, axis=0), Right(0, spatial_order, v, 0, axis=0),
                     Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
