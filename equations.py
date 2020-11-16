@@ -8,9 +8,9 @@ from spatial import FiniteDifferenceUniformGrid, Left, Right
 class SW: # no bottom topography, viscocity, boundary conditions
 
     def __init__(self, X, spatial_order, g,f=0,b=0): # g=gravity, f=coriolis, b=drag
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         self.domain = u.domain
         self.X = X
 
@@ -28,11 +28,10 @@ class SW: # no bottom topography, viscocity, boundary conditions
 
 class SW2:  # no viscocity, boundary conditions,
 
-    def __init__(self, X, spatial_order, g, f=0,b=0): # g=gravity, f=coriolis, b=drag
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
-        H = X.field_list[3]
+    def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         self.domain = u.domain
         self.X = X
 
@@ -47,9 +46,9 @@ class SW2:  # no viscocity, boundary conditions,
 
         self.F_ops = [-h * dudx - u * dhdx - h * dvdy - v * dhdy -H*dudx -H*dvdy - u*dHdx -v*dHdy,
                       -u * dudx - v * dudy - g * dhdx + f*v -b*u,
-                      -u * dvdx - v * dvdy - g * dhdy - f*u -b*v,
-                      0*H]
+                      -u * dvdx - v * dvdy - g * dhdy - f*u -b*v]
 
+        self.BCs=[]
 
 class SWsqBC: # SW with boundary conditions on a square tub
 
@@ -77,11 +76,10 @@ class SWsqBC: # SW with boundary conditions on a square tub
 class SW2sqBC: # SW2 with boundary conditions on a square tub
     # implement bc for H, right now only works for periodic H, eg sinx*siny
 
-    def __init__(self, X, spatial_order, g, f, b):  # g=gravity, f=coriolis, b=drag
+    def __init__(self, X, spatial_order, g, f, b,H):  # g=gravity, f=coriolis, b=drag
         h = X.field_list[0]
         u = X.field_list[1]
         v = X.field_list[2]
-        H = X.field_list[3]
         self.domain = u.domain
         self.X = X
 
@@ -96,8 +94,7 @@ class SW2sqBC: # SW2 with boundary conditions on a square tub
 
         self.F_ops = [-h * dudx - u * dhdx - h * dvdy - v * dhdy - H * dudx - H * dvdy - u * dHdx - v * dHdy,
                       -u * dudx - v * dudy - g * dhdx + f * v - b * u,
-                      -u * dvdx - v * dvdy - g * dhdy - f * u - b * v,
-                      0 * H]
+                      -u * dvdx - v * dvdy - g * dhdy - f * u - b * v]
 
         self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
                     Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]

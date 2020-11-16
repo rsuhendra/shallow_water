@@ -12,9 +12,9 @@ class SWFull:
     def __init__(self, X, spatial_order, g,f,b,nu):
         self.t = 0
         self.iter = 0
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         H = X.field_list[3]
         self.domain = u.domain
         self.X = X

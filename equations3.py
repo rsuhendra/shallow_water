@@ -7,11 +7,10 @@ from spatial import FiniteDifferenceUniformGrid, Left, Right
 
 class linearSW:  # no viscocity, boundary conditions,
 
-    def __init__(self, X, spatial_order, g, f): # g=gravity, f=coriolis, b=drag
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
-        H = X.field_list[3]
+    def __init__(self, X, spatial_order, g, f,H): # g=gravity, f=coriolis, b=drag
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
 
         self.domain = u.domain
         self.X = X
