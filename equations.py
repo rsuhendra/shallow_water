@@ -53,9 +53,9 @@ class SW2:  # no viscocity, boundary conditions,
 class SWsqBC: # SW with boundary conditions on a square tub
 
     def __init__(self, X, spatial_order, g,f=0,b=0):
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         self.domain = u.domain
         self.X = X
 
@@ -77,9 +77,9 @@ class SW2sqBC: # SW2 with boundary conditions on a square tub
     # implement bc for H, right now only works for periodic H, eg sinx*siny
 
     def __init__(self, X, spatial_order, g, f, b,H):  # g=gravity, f=coriolis, b=drag
-        h = X.field_list[0]
-        u = X.field_list[1]
-        v = X.field_list[2]
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         self.domain = u.domain
         self.X = X
 

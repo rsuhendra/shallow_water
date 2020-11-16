@@ -29,9 +29,9 @@ class linearSW:  # no viscocity, boundary conditions,
 class linearSW1D:  # no viscocity, boundary conditions, second dimension
 
     def __init__(self, X, spatial_order, g, f): # g=gravity, f=coriolis, b=drag
-        h = X.field_list[0]
-        u = X.field_list[1]
-        H = X.field_list[2]
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
         # v = X.field_list[2]
 
         self.domain = u.domain
