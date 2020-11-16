@@ -40,8 +40,9 @@ class linearSW2:  # no viscocity, boundary conditions,
         dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
         dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
         dHdx = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=0)
+        dHdy = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=1)
 
-        self.F_ops = [-H*dudx -H*dvdy,
+        self.F_ops = [-H*dudx -H*dvdy -u*dHdx -v*dHdy,
                       - g * dhdx + f*v -b*u,
                       - g * dhdy - f*u -b*v]
         self.BCs=[]

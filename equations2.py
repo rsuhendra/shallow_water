@@ -143,4 +143,4 @@ class SWF:
                       -u * dvdx - v * dvdy - g * dhdy - f*u -b*v,
                       0*H]
 
-        self.BCs = [0*u, 0*u, 0*u, 0*u]
+        self.BCs = []
