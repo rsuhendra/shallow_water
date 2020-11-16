@@ -7,7 +7,7 @@ from spatial import FiniteDifferenceUniformGrid, Left, Right
 
 class linearSW:  # no viscocity, boundary conditions,
 
-    def __init__(self, X, spatial_order, g, f,H): # g=gravity, f=coriolis, b=drag
+    def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
         v = X.field_list[1]
         h = X.field_list[2]
@@ -20,10 +20,35 @@ class linearSW:  # no viscocity, boundary conditions,
         dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
         dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
 
-        self.F_ops = [-H*dudx -H*dvdy,
-                      - g * dhdx + f*v ,
-                      - g * dhdy - f*u]
+        self.F_ops = [-H * dudx - H * dvdy,
+                      - g * dhdx + f * v - b * u,
+                      - g * dhdy - f * u - b * v]
         self.BCs=[]
+
+class linearSW2:  # no viscocity, boundary conditions,
+
+    def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
+        u = X.field_list[0]
+        v = X.field_list[1]
+        h = X.field_list[2]
+
+        self.domain = u.domain
+        self.X = X
+
+        dhdx = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=0)
+        dhdy = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=1)
+        dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
+        dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
+        dHdx = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=0)
+
+        self.F_ops = [-H*dudx -H*dvdy,
+                      - g * dhdx + f*v -b*u,
+                      - g * dhdy - f*u -b*v]
+        self.BCs=[]
+
+
+
+
 
 
 class linearSW1D:  # no viscocity, boundary conditions, second dimension

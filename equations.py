@@ -7,7 +7,7 @@ from spatial import FiniteDifferenceUniformGrid, Left, Right
 
 class SW: # no bottom topography, viscocity, boundary conditions
 
-    def __init__(self, X, spatial_order, g,f=0,b=0): # g=gravity, f=coriolis, b=drag
+    def __init__(self, X, spatial_order, g,f,b): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
         v = X.field_list[1]
         h = X.field_list[2]
@@ -52,7 +52,7 @@ class SW2:  # no viscocity, boundary conditions,
 
 class SWsqBC: # SW with boundary conditions on a square tub
 
-    def __init__(self, X, spatial_order, g,f=0,b=0):
+    def __init__(self, X, spatial_order, g,f,b):
         u = X.field_list[0]
         v = X.field_list[1]
         h = X.field_list[2]
