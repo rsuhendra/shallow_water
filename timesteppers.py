@@ -363,27 +363,6 @@ class LaxWendorff(Timestepper):
             self.dt = dt
         self.RHS.operate(self.u, out=self.u)
 
-class MacCormack (ExplicitTimestepper):
-
-    def __init__(self, eq_set):
-        super().__init__(eq_set)
-        self.X_old = np.copy(self.X.data)
-        self.F_old = np.copy(self.F.data)
-
-    def _step(self, dt):
-        # predictor
-        self._evaluate_F()
-        np.copyto(self.X_old, self.X.data)
-        self.X.data += dt*self.F.data
-        self._evaluate_BCs()
-        # corrector
-        np.copyto(self.F_old, self.F.data)
-        self._evaluate_F()
-        np.copyto(self.X.data, (self.X_old+self.X.data)/2 + dt/2*(self.F_old + self.F.data))
-        self._evaluate_BCs()
-
-
-'''
 class MacCormack(Timestepper):
 
     def __init__(self, u, op_f, op_b):
@@ -405,5 +384,5 @@ class MacCormack(Timestepper):
             self.dt = dt
         self.RHS1.operate(self.u, out=self.u1)
         self.u.data = 0.5*self.u.data + self.RHS2.operate(self.u1).data
-'''
+
 
