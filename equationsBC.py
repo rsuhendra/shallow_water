@@ -5,7 +5,7 @@ from field import Field, FieldSystem
 from timesteppers import CrankNicolson, PredictorCorrector
 from spatial import FiniteDifferenceUniformGrid, Left, Right
 
-class SWBC:  # no viscocity, boundary conditions,
+class SWBC:  # no viscocity
 
     def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
@@ -30,7 +30,7 @@ class SWBC:  # no viscocity, boundary conditions,
         self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
                     Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
 
-class linearSWBC:  # no viscocity, boundary conditions,
+class linearSWBC:  # linear, no viscocity
 
     def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
@@ -54,7 +54,7 @@ class linearSWBC:  # no viscocity, boundary conditions,
         self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
                     Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
 
-class SWFullBC:
+class SWFullBC: # full with bc
 
     def __init__(self, X, spatial_order, g,f,b,nu,H):
         self.t = 0
@@ -80,8 +80,8 @@ class SWFullBC:
         dvdy2 = FiniteDifferenceUniformGrid(2, spatial_order, v, axis=1)
 
 
-        diffx = SWDiffxBC(X, nu, dudx2, dvdx2)
-        diffy = SWDiffyBC(X, nu, dudy2, dvdy2)
+        diffx = SWDiffxBC(X, spatial_order, nu, dudx2, dvdx2)
+        diffy = SWDiffyBC(X, spatial_order, nu, dudy2, dvdy2)
         nonlinear = SWFBC(X, spatial_order, dudx, dudy, dvdx, dvdy, dhdx, dhdy, dHdx, dHdy,f,g,b,H)
 
         self.ts_x = CrankNicolson(diffx, 0)
@@ -100,7 +100,7 @@ class SWFullBC:
         self.iter += 1
 
 class SWDiffxBC:
-    def __init__(self, X, nu, dudx2, dvdx2):
+    def __init__(self, X, spatial_order, nu, dudx2, dvdx2):
         u = X.field_list[0]
         v = X.field_list[1]
         h = X.field_list[2]
@@ -115,16 +115,29 @@ class SWDiffxBC:
         eq2 = vt - nu * dvdx2
         eq3 = ht
 
+        bc1 = Left(0, spatial_order, u, 0, axis=0)
+        bc2 = Right(1, spatial_order, u, 0, axis=0)
+
         self.M = sparse.bmat([[eq1.field_coeff(ut, axis=0), eq1.field_coeff(vt, axis=0), eq1.field_coeff(ht, axis=0)],
                               [eq2.field_coeff(ut, axis=0), eq2.field_coeff(vt, axis=0), eq2.field_coeff(ht, axis=0)],
                               [eq3.field_coeff(ut, axis=0), eq3.field_coeff(vt, axis=0), eq3.field_coeff(ht, axis=0)]])
+
 
         self.L = sparse.bmat([[eq1.field_coeff(u, axis=0), eq1.field_coeff(v, axis=0), eq1.field_coeff(h, axis=0)],
                               [eq2.field_coeff(u, axis=0), eq2.field_coeff(v, axis=0), eq2.field_coeff(h, axis=0)],
                               [eq3.field_coeff(u, axis=0), eq3.field_coeff(v, axis=0), eq3.field_coeff(h, axis=0)]])
 
+        self.M[:1, :] = bc1.field_coeff(ut, axis=0)
+        self.M[-1:, :] = bc2.field_coeff(ut, axis=0)
+        self.M.eliminate_zeros()
+
+
+        self.L[:1, :] = bc1.field_coeff(u, axis=0)
+        self.L[-1:, :] = bc2.field_coeff(u, axis=0)
+        self.L.eliminate_zeros()
+
 class SWDiffyBC:
-    def __init__(self, X, nu, dudy2, dvdy2):
+    def __init__(self, X, spatial_order, nu, dudy2, dvdy2):
         u = X.field_list[0]
         v = X.field_list[1]
         h = X.field_list[2]
@@ -139,6 +152,9 @@ class SWDiffyBC:
         eq2 = vt - nu * dvdy2
         eq3 = ht
 
+        bc1 = Left(0, spatial_order, v, 0, axis=1)
+        bc2 = Right(1, spatial_order, v, 0, axis=1)
+
         self.M = sparse.bmat([[eq1.field_coeff(ut, axis=1), eq1.field_coeff(vt, axis=1), eq1.field_coeff(ht, axis=1)],
                               [eq2.field_coeff(ut, axis=1), eq2.field_coeff(vt, axis=1), eq2.field_coeff(ht, axis=1)],
                               [eq3.field_coeff(ut, axis=1), eq3.field_coeff(vt, axis=1), eq3.field_coeff(ht, axis=1)]])
@@ -146,6 +162,14 @@ class SWDiffyBC:
         self.L = sparse.bmat([[eq1.field_coeff(u, axis=1), eq1.field_coeff(v, axis=1), eq1.field_coeff(h, axis=1)],
                               [eq2.field_coeff(u, axis=1), eq2.field_coeff(v, axis=1), eq2.field_coeff(h, axis=1)],
                               [eq3.field_coeff(u, axis=1), eq3.field_coeff(v, axis=1), eq3.field_coeff(h, axis=1)]])
+
+        self.M[:, :1] = bc1.field_coeff(vt, axis=1)
+        self.M[:, -1:] = bc2.field_coeff(vt, axis=1)
+        self.M.eliminate_zeros()
+
+        self.L[:, :1] = bc1.field_coeff(v, axis=1)
+        self.L[:, -1:] = bc2.field_coeff(v, axis=1)
+        self.L.eliminate_zeros()
 
 class SWFBC:
     def __init__(self, X,spatial_order, dudx, dudy, dvdx, dvdy, dhdx, dhdy, dHdx, dHdy,f,g,b,H):
