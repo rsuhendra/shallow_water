@@ -5,55 +5,6 @@ from field import Field, FieldSystem
 from timesteppers import CrankNicolson, PredictorCorrector
 from spatial import FiniteDifferenceUniformGrid, Left, Right
 
-class SWBC:  # no viscocity
-
-    def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
-        u = X.field_list[0]
-        v = X.field_list[1]
-        h = X.field_list[2]
-        self.domain = u.domain
-        self.X = X
-
-        dhdx = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=0)
-        dhdy = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=1)
-        dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
-        dudy = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=1)
-        dvdx = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=0)
-        dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
-        dHdx = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=0)
-        dHdy = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=1)
-
-        self.F_ops = [-u * dudx - v * dudy - g * dhdx + f*v -b*u,
-                      -u * dvdx - v * dvdy - g * dhdy - f*u -b*v,
-                      -h * dudx - u * dhdx - h * dvdy - v * dhdy -H*dudx -H*dvdy - u*dHdx -v*dHdy]
-
-        self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
-                    Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
-
-class linearSWBC:  # linear, no viscocity
-
-    def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
-        u = X.field_list[0]
-        v = X.field_list[1]
-        h = X.field_list[2]
-
-        self.domain = u.domain
-        self.X = X
-
-        dhdx = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=0)
-        dhdy = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=1)
-        dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
-        dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
-        dHdx = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=0)
-        dHdy = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=1)
-
-        self.F_ops = [- g * dhdx + f*v -b*u,
-                      - g * dhdy - f*u -b*v,
-                      -H*dudx -H*dvdy -u*dHdx -v*dHdy]
-
-        self.BCs = [Left(0, spatial_order, u, 0, axis=0), Right(0, spatial_order, u, 0, axis=0),
-                    Left(0, spatial_order, v, 0, axis=1), Right(0, spatial_order, v, 0, axis=1)]
-
 class SWFullBC: # full with bc
 
     def __init__(self, X, spatial_order, g,f,b,nu,H):
@@ -106,8 +57,7 @@ class SWDiffxBC:
         h = X.field_list[2]
         self.domain = u.domain
         self.X = X
-        N = len(u.data)
-        print(N)
+
         ut = Field(u.domain)
         vt = Field(v.domain)
         ht = Field(h.domain)
@@ -129,13 +79,13 @@ class SWDiffxBC:
                               [eq3.field_coeff(u, axis=0), eq3.field_coeff(v, axis=0), eq3.field_coeff(h, axis=0)]])
 
         self.M=self.M.tocsr()
-        self.M[0, :] = np.concatenate((bc1.field_coeff(ut, axis=0), bc1.field_coeff(vt, axis=0), bc1.field_coeff(ht, axis=0)),axis=1)
-        self.M[N-1,:] = np.concatenate((bc2.field_coeff(ut, axis=0), bc2.field_coeff(vt, axis=0), bc2.field_coeff(ht, axis=0)),axis=1)
+        self.M[:1, :] = np.concatenate((bc1.field_coeff(ut, axis=0), bc1.field_coeff(vt, axis=0), bc1.field_coeff(ht, axis=0)),axis=1)
+        self.M[-1:, :] = np.concatenate((bc2.field_coeff(ut, axis=0), bc2.field_coeff(vt, axis=0), bc2.field_coeff(ht, axis=0)),axis=1)
         self.M.eliminate_zeros()
 
         self.L=self.L.tocsr()
-        self.L[0, :] = np.concatenate((bc1.field_coeff(u, axis=0), bc1.field_coeff(v, axis=0), bc1.field_coeff(h, axis=0)),axis=1)
-        self.L[N-1, :] = np.concatenate((bc2.field_coeff(u, axis=0), bc2.field_coeff(v, axis=0), bc2.field_coeff(h, axis=0)),axis=1)
+        self.L[:1, :] = np.concatenate((bc1.field_coeff(u, axis=0), bc1.field_coeff(v, axis=0), bc1.field_coeff(h, axis=0)),axis=1)
+        self.L[-1:, :] = np.concatenate((bc2.field_coeff(u, axis=0), bc2.field_coeff(v, axis=0), bc2.field_coeff(h, axis=0)),axis=1)
         self.L.eliminate_zeros()
 
 class SWDiffyBC:
@@ -145,7 +95,6 @@ class SWDiffyBC:
         h = X.field_list[2]
         self.domain = u.domain
         self.X = X
-        N = len(u.data)
 
         ut = Field(u.domain)
         vt = Field(v.domain)
@@ -167,13 +116,13 @@ class SWDiffyBC:
                               [eq3.field_coeff(u, axis=1), eq3.field_coeff(v, axis=1), eq3.field_coeff(h, axis=1)]])
 
         self.M=self.M.tocsr()
-        self.M[N, :] = np.concatenate((bc1.field_coeff(ut, axis=1), bc1.field_coeff(vt, axis=1), bc1.field_coeff(ht, axis=1)),axis=1)
-        self.M[2*N-1, :] = np.concatenate((bc2.field_coeff(ut, axis=1), bc2.field_coeff(vt, axis=1), bc2.field_coeff(ht, axis=1)),axis=1)
+        self.M[:, :1] = np.concatenate((bc1.field_coeff(ut, axis=1), bc1.field_coeff(vt, axis=1), bc1.field_coeff(ht, axis=1)),axis=1).T
+        self.M[:, -1:] = np.concatenate((bc2.field_coeff(ut, axis=1), bc2.field_coeff(vt, axis=1), bc2.field_coeff(ht, axis=1)),axis=1).T
         self.M.eliminate_zeros()
 
         self.L=self.L.tocsr()
-        self.L[N, :] = np.concatenate((bc1.field_coeff(u, axis=1), bc1.field_coeff(v, axis=1), bc1.field_coeff(h, axis=1)),axis=1)
-        self.L[2*N-1, :] = np.concatenate((bc2.field_coeff(u, axis=1), bc2.field_coeff(v, axis=1), bc2.field_coeff(h, axis=1)),axis=1)
+        self.L[:, :1] = np.concatenate((bc1.field_coeff(u, axis=1), bc1.field_coeff(v, axis=1), bc1.field_coeff(h, axis=1)),axis=1).T
+        self.L[:, -1:] = np.concatenate((bc2.field_coeff(u, axis=1), bc2.field_coeff(v, axis=1), bc2.field_coeff(h, axis=1)),axis=1).T
         self.L.eliminate_zeros()
 
 class SWFBC:
