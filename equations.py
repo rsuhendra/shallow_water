@@ -1,3 +1,24 @@
+# Author: Carter Koehler and Richard Suhendra
+#
+# This file contains various forms of the 2D Shallow Water Equations with periodic boundary conditions
+#
+# Including:
+# SW(X,spatial_order,g,f,b,H)
+# linearSW(X,spatial_order,g,f,b,H)
+# SWFull(X,spatial_order,g,f,b,nu,H)
+# linearSWBE(X,spatial_order,g,H)
+#
+# Input variables are described here:
+# X = field_list([u,v,h])
+# spatial_order = desired spatial_accuracy of derivatives
+# g = gravitational acceleration
+# f = coriolis effect coefficient
+# b = drag coefficient
+# nu = viscocity coefficient
+# H = bottom topography
+
+
+
 import numpy as np
 from scipy import sparse
 
@@ -5,7 +26,7 @@ from field import Field, FieldSystem
 from timesteppers import CrankNicolson, PredictorCorrector
 from spatial import FiniteDifferenceUniformGrid, Left, Right
 
-class SW:  # no viscocity, boundary conditions,
+class SW:  # no viscocity or boundary conditions
 
     def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
@@ -29,7 +50,7 @@ class SW:  # no viscocity, boundary conditions,
 
         self.BCs=[]
 
-class linearSW:  # no viscocity, boundary conditions,
+class linearSW:  # linear case, no viscocity or boundary conditions
 
     def __init__(self, X, spatial_order, g, f,b,H): # g=gravity, f=coriolis, b=drag
         u = X.field_list[0]
@@ -43,13 +64,15 @@ class linearSW:  # no viscocity, boundary conditions,
         dhdy = FiniteDifferenceUniformGrid(1, spatial_order, h, axis=1)
         dudx = FiniteDifferenceUniformGrid(1, spatial_order, u, axis=0)
         dvdy = FiniteDifferenceUniformGrid(1, spatial_order, v, axis=1)
+        dHdx = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=0)
+        dHdy = FiniteDifferenceUniformGrid(1, spatial_order, H, axis=1)
 
-        self.F_ops = [- g * dhdx + f*v -b*u,
-                      - g * dhdy - f*u -b*v,
-                      -H*dudx -H*dvdy]
+        self.F_ops = [- g * dhdx + f * v - b * u,
+                      - g * dhdy - f * u - b * v,
+                      -H * dudx - H * dvdy - u * dHdx - v * dHdy]
         self.BCs=[]
 
-class SWFull:
+class SWFull: # full case, but without boundary conditions
 
     def __init__(self, X, spatial_order, g,f,b,nu,H):
         self.t = 0
@@ -156,7 +179,7 @@ class SWF:
         self.BCs = []
 
 
-class linearSWBE:
+class linearSWBE: # linear case, to be evaluated implicitly. no boundary conditions
 
     def __init__(self, X, spatial_order, g, H):
         self.t = 0

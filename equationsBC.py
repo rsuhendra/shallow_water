@@ -1,3 +1,20 @@
+# Author: Carter Koehler and Richard Suhendra
+#
+# This file contains various forms of the 2D Shallow Water Equations with non-periodic boundary conditions
+#
+# Including:
+# SWBC(X,spatial_order,g,f,b,H)
+# linearSWBC(X,spatial_order,g,f,b,H)
+# SWFullBC(X,spatial_order,g,f,b,nu,H)
+#
+# Input variables are described here:
+# X = field_list([u,v,h])
+# spatial_order = desired spatial_accuracy of derivatives
+# g = gravitational acceleration
+# f = coriolis effect coefficient
+# b = drag coefficient
+# nu = viscocity coefficient
+
 import numpy as np
 from scipy import sparse
 

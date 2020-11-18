@@ -1,3 +1,19 @@
+# Author: Carter Koehler and Richard Suhendra
+#
+# This file contains various forms of the 1D Shallow Water Equations with periodic boundary conditions
+#
+# Including:
+# linearSW1D(X,spatial_order,g,H)
+# SWFull1D(X,spatial_order,g,f,b,nu,H)
+#
+# Input variables are described here:
+# X = field_list([u,h])
+# spatial_order = desired spatial_accuracy of derivatives
+# g = gravitational acceleration
+# f = coriolis effect coefficient
+# b = drag coefficient
+# H = bottom topography
+
 import numpy as np
 from scipy import sparse
 
