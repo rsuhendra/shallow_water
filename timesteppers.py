@@ -163,7 +163,9 @@ class ImplicitTimestepper(Timestepper):
 
 
 class BackwardEuler(ImplicitTimestepper):
-
+    def __init__(self, eq_set, axis=None):
+        super().__init__(eq_set, axis)
+        self.RHS = np.copy(self.data)
     def _step(self, dt):
         if dt != self.dt:
             LHS = self.M + dt*self.L
