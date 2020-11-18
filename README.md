@@ -1,5 +1,5 @@
 # shallow_water
-Shallow Water Equations Finite Difference
+Implementation of the Shallow Water Equations using Finite Difference techniques
 
 Authors: Carter Koehler and Richard Suhendra
 
